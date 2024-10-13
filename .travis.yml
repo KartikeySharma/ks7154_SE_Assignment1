@@ -1,0 +1,35 @@
+language: python
+python:
+  - "3.9"
+
+dist: focal 
+
+install:
+  - pip install -U pip
+  - pip install -r requirements.txt
+
+# Apply migrations and run tests
+script:
+  - python manage.py migrate
+  - coverage run --source=polls manage.py test  
+  - coverage report  
+  - black --check .
+  - flake8
+
+after_success:
+  - coveralls 
+
+branches:
+  only:
+    - master
+
+deploy:
+  provider: elasticbeanstalk
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  region: "us-east-1"  
+  app: "mysite"  
+  env: "mysite-dev"  
+  bucket_name: "elasticbeanstalk-us-east-1-850995547068"  # Change to yours
+  on:
+    branch: master # Will only deploy on master branch
